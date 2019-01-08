@@ -1,50 +1,33 @@
-from flask import Flask, render_template, request
-import sqlite3 as sql
+from flask import Flask, request, render_template
+from flask_sqlalchemy import SQLAlchemy
+import os
+
 app = Flask(__name__)
+app.config.from_object(os.environ['APP_SETTINGS'])
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+from eduBoard import *
 
-@app.route('/enternew')
-def new_student():
-    return render_template('student.html')
+@app.route('/board', methods=['GET'])
+def board():
+    return render_template('board.html')
+ 
+@app.route('/board/lists', method=['GET'])
+def readBoardLists():
+    return render_template('board.html')
 
+@app.route('/board/lists', method=['POST'])
+def createBoard():
+    return ''
 
-@app.route('/addrec', methods = ['POST', 'GET'])
-def addrec():
-    if request.method == 'POST':
-        try:
-            nm = request.form['nm']
-            addr = request.form['add']
-            city = request.form['city']
-            pin = request.form['pin']
+@app.route('/board/lists/<int:no>', method=['PUT'])
+def updateBoard():
+    return ''
 
-            with sql.connect('test.db') as con:
-                cur = con.cursor()
-                
-                cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?, ?, ?, ?)", (nm,addr,city,pin))
-
-                con.commit()
-                msg = "Record successfully added"
-        except:
-            con.rollback()
-            msg = "error in insert operation"
-
-        finally:
-            return render_template("msg.html", msg = msg)
-            con.close()
-
-@app.route('/list')
-def list():
-    con = sql.connect("test.db")
-    con.row_factory = sql.Row
-    
-    cur = con.cursor()
-    cur.execute("select * from students")
-
-    rows = cur.fetchall();
-    return render_template("list.html", rows = rows)
+@app.route('/board/lists/<int:no>', method=['DELETE'])
+def deleteBoard():
+    return ''
 
 if __name__ == '__main__':
     app.run(debug = True)
